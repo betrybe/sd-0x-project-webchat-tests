@@ -68,7 +68,7 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
   });
 
   it('Será validado que ao enviar uma mensagem e recarregar a página , a mensagem persistirá', async () => {
-    const chatMessage = 'vamos pro bar galera'
+    const chatMessage = 'vamos pro bar galera';
     const nickname = 'Tiago Abravanel';
 
     await page.goto(BASE_URL);
