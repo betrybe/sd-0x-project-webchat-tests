@@ -82,8 +82,9 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     await messageBox.type(chatMessage);
     const sendButton = await page.$('[data-testid=send-button]');
     await sendButton.click();
-
+    wait(1000);
     await page.reload();
+    wait(1000);
     await page.waitForSelector('[data-testid=message]');
     const messages = await page.$$eval('[data-testid=message]', (nodes) => nodes.map((n) => n.innerText));
     expect(messages[0]).toMatch(RegExp(chatMessage));
