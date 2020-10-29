@@ -60,11 +60,11 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     wait(1000);
     const messages = await page.$$eval('[data-testid=message]', (nodes) => nodes.map((n) => n.innerText));
     expect(messages.length).toBeGreaterThanOrEqual(2);
-    const firstMessage = messages[0];
-    expect(firstMessage).toEqual(expect.stringMatching('jorge - bora meu povo'));
-    const secondLastMessage = messages[1];
-    expect(secondLastMessage).toEqual(expect.stringMatching('miguel - opa vamos que vamos'));
-    
+
+    const lastMessage = messages.pop();
+    expect(lastMessage).toMatch(RegExp(secondMessageToSend.chatMessage));
+    const secondLastMessage = messages.pop();
+    expect(secondLastMessage).toMatch(RegExp(firstMessageToSend.chatMessage));
   });
 
   it('Será validado que ao enviar uma mensagem e recarregar a página , a mensagem persistirá', async () => {
