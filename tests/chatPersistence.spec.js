@@ -36,8 +36,9 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
   it('Será validado que todo o histórico de mensagens irá aparecer quando o cliente se conectar', async () => {
     const chatMessage = 'bora meu povo';
     const nickname = 'Joel';
+    const firstMessageToSend = { chatMessage, nickname };
 
-    client1.emit('message', { chatMessage, nickname });
+    client1.emit('message', firstMessageToSend);
 
     await page.goto(BASE_URL);
     await page.waitForSelector('[data-testid=message]');
