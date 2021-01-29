@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+const cheerio = require('cheerio');
+const axios = require('axios');
 require('dotenv').config();
 const io = require('socket.io-client');
 const faker = require('faker');
@@ -5,6 +10,15 @@ const puppeteer = require('puppeteer');
 const { MongoClient } = require('mongodb');
 
 const BASE_URL = 'http://localhost:3000/';
+
+function wait(time) {
+  const start = Date.now();
+  while (true) {
+    if (Date.now() - start >= time) {
+      return true;
+    }
+  }
+}
 
 describe('Elabore o histórico do chat para que as mensagens persistão', () => {
   const client1 = io(BASE_URL);
@@ -70,5 +84,29 @@ describe('Elabore o histórico do chat para que as mensagens persistão', () => 
     await page.waitForSelector('[data-testid=message]');
     const messages = await page.$$eval('[data-testid=message]', (nodes) => nodes.map((n) => n.innerText));
     expect(messages[0]).toMatch(RegExp(chatMessage));
+  });
+
+  it('Será validado histórico de mensagens em MVC', async () => {
+    const chatMessage = faker.hacker.phrase();
+    const nickname = 'Jorge da Capadócia';
+
+    await page.goto(BASE_URL);
+
+    const nicknameBox = await page.$('[data-testid=nickname-box]');
+    await nicknameBox.type(nickname);
+    const saveButton = await page.$('[data-testid=nickname-save]');
+    await saveButton.click();
+
+    const messageBox = await page.$('[data-testid=message-box]');
+    await messageBox.type(chatMessage);
+    const sendButton = await page.$('[data-testid=send-button]');
+    await sendButton.click();
+    wait(1000);
+
+    const response = await axios.get('http://localhost:3000/');
+    const $ = cheerio.load(response.data);
+    const message = $('[data-testid="message"]').html()
+    expect(message.includes(nickname)).toBeTruthy();
+    expect(message.includes(chatMessage)).toBeTruthy();
   });
 });

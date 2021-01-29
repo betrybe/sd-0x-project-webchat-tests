@@ -1,5 +1,10 @@
+/**
+ * @jest-environment node
+ */
 require('dotenv').config();
 
+const cheerio = require('cheerio');
+const axios = require('axios');
 const faker = require('faker');
 const puppeteer = require('puppeteer');
 const { MongoClient } = require('mongodb');
@@ -109,5 +114,24 @@ describe('Informe a todos os clientes quem está online no momento', () => {
     await newPage.close();
 
     expect(usersOnline).not.toContain(secondNickname);
+  });
+
+  it('Será validado usuários online em MVC', async () => {
+    const nickname = 'Joao da carrocinha';
+    await page.goto(BASE_URL);
+    const nicknameBox = await page.$(dataTestid('nickname-box'));
+    const nicknameSave = await page.$(dataTestid('nickname-save'));
+
+    await page.$eval('[data-testid="nickname-box"]', (el) => (el.value = ''));
+    await page.waitForTimeout(1000);
+    await nicknameBox.type(nickname);
+    await nicknameSave.click();
+    const response = await axios.get('http://localhost:3000/');
+    const $ = cheerio.load(response.data);
+    const onlineUserPosition = $('[data-testid="online-user"]').length - 1;
+    const changedNameUser = Object.values($('[data-testid="online-user"]'))[
+      onlineUserPosition
+    ].children[0].data;
+    expect(changedNameUser).toBe(nickname);
   });
 });
