@@ -20,7 +20,7 @@ function wait(time) {
   }
 }
 
-describe('Permita que usuários troquem mensagens particulares', () => {
+describe('5 - Permita que usuários troquem mensagens particulares', () => {
   let browser;
   let page;
   let connection;

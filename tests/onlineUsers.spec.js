@@ -15,7 +15,7 @@ function dataTestid(name) {
   return `[data-testid=${name}]`;
 }
 
-describe('Informe a todos os clientes quem está online no momento', () => {
+describe('4 - Informe a todos os clientes quem está online no momento', () => {
   let browser;
   let page;
   let connection;

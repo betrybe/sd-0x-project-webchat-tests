@@ -10,7 +10,7 @@ function dataTestid(name) {
   return `[data-testid=${name}]`;
 }
 
-describe('Crie um frontend para que as pessoas interajam com o chat', () => {
+describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => {
   let browser;
   let page;
   let connection;
