@@ -20,7 +20,7 @@ function wait(time) {
   }
 }
 
-describe('3 - Elabore o histórico do chat para que as mensagens persistão', () => {
+describe('3 - Elabore o histórico do chat para que as mensagens persistam', () => {
   const client1 = io(BASE_URL);
   const client2 = io(BASE_URL);
   let browser;
