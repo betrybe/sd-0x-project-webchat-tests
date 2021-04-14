@@ -1,59 +1,64 @@
 const io = require('socket.io-client');
-const { MongoClient } = require('mongodb');
-require('dotenv').config();
 
 const BASE_URL = 'http://localhost:3000/';
 
-describe('Crie um back-end para conexão simultaneamente de clientes e troca de mensagens em chat público', () => {
-  const chatMessage = 'Olá meu caros amigos!';
-  const nickname = 'Joel';
+describe('1 - Crie um back-end para conexão simultânea de clientes e troca de mensagens em chat público', () => {
+  const chatMessage = 'We can only see a short distance ahead, but we can see plenty there that needs to be done.';
+  const nickname = 'Alan Turing';
+
   let client1;
   let client2;
-  let connection;
-  let db;
+  let client3;
 
-  beforeEach(async () => {
-    connection = await MongoClient.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    db = connection.db(process.env.DB_NAME);
-    await db.collection('messages').deleteMany({});
-    client1 = io.connect(BASE_URL);
-    client2 = io.connect(BASE_URL);
+  beforeEach(async (done) => {
+    client1 = io.connect(BASE_URL, { reconnection: false });
+    client2 = io.connect(BASE_URL, { reconnection: false });
+    client3 = io.connect(BASE_URL, { reconnection: false });
+    done();
   });
 
-  afterEach(async () => {
-    await db.collection('messages').deleteMany({});
+  afterEach(async (done) => {
     client1.disconnect();
     client2.disconnect();
-    await connection.close();
+    client3.disconnect();
+    done();
   });
 
-  it('Será validado que vários clientes conseguem se conectar ao mesmo tempo', (done) => {
+  it('Será validado que vários clientes conseguem se conectar ao mesmo tempo', () => {
     client1.on('connect', () => {
       expect(client1.connected).toBeTruthy();
+      expect.assertions(1);
     });
     client2.on('connect', () => {
       expect(client2.connected).toBeTruthy();
       expect.assertions(2);
-      done();
+    });
+    client3.on('connect', () => {
+      expect(client2.connected).toBeTruthy();
+      expect.assertions(3);
     });
   });
 
-  it('Será validado que cada cliente conectado ao chat recebe todas as mensagens que já foram enviadas', (done) => {
+  it('Será validado que todos os clientes que estão conectados ao chat recebem as mensagens enviadas', () => {
     client1.emit('message', { chatMessage, nickname });
 
     client1.on('message', (message) => {
       expect(message.includes(chatMessage)).toBeTruthy();
+      expect.assertions(1);
     });
+
     client2.on('message', (message) => {
       expect(message.includes(chatMessage)).toBeTruthy();
-      done();
+      expect.assertions(2);
+    });
+
+    client3.on('message', (message) => {
+      expect(message.includes(chatMessage)).toBeTruthy();
+      expect.assertions(3);
     });
   });
 
-  it('Será validado que toda mensagem que um cliente recebe contém as informações acerca de quem a enviou, data-hora do envio e o conteúdo da mensagem em si', (done) => {
+  it('Será validado que toda mensagem que um cliente recebe contém as informações acerca de quem a enviou, data-hora do envio e o conteúdo da mensagem em si', () => {
     const dateRegex = /\d{1,2}-\d{1,2}-\d{4}/gm;
     const timeRegex = /\d{1,2}:\d{1,2}(:\d{0,2})?/gm;
 
@@ -70,7 +75,6 @@ describe('Crie um back-end para conexão simultaneamente de clientes e troca de 
       expect(message.includes(nickname)).toBeTruthy();
       expect(message).toMatch(dateRegex);
       expect(message).toMatch(timeRegex);
-      done();
     });
   });
 });
