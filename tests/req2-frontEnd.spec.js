@@ -35,7 +35,7 @@ describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => 
 
     const givenNickname = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
 
-    expect(givenNickname[0]).toMatch(/^[\w'-]{16}$/);
+    expect(givenNickname[0]).toMatch(/^[\w'-]{20}$/);
   });
 
 
@@ -103,6 +103,22 @@ describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => 
     expect(nicknameButton).not.toBeNull();
   });
 
+  it('Será validado que o nickname pode ser alterado', async () => {
+    await page.waitForSelector(dataTestid('online-user'));
+
+    //Client changes nickname
+    const nicknameBox = await page.$(`input${dataTestid('nickname-box')}`);
+    await nicknameBox.type(nickname);
+
+    const nicknameButton = await page.$(`button${dataTestid('nickname-button')}`);
+    await nicknameButton.click();
+    await page.waitForTimeout(500);
+
+    const newNickname = await page.$$eval(dataTestid('online-user'), (nodes) => nodes.map((n) => n.innerText));
+
+    expect(newNickname[0]).toMatch(nickname);
+  });
+
   it('Será validado que é possível enviar mensagens após alterar o nickname', async () => {
 
     //Client changes nickname
@@ -127,8 +143,8 @@ describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => 
       expect.arrayContaining([
         expect.stringMatching(chatMessage),
         expect.stringMatching(nickname),
-      ])
-    )
+      ]),
+    );
 
     //another client gets in
     const page2 = await browser.newPage();
@@ -149,7 +165,7 @@ describe('2 - Crie um frontend para que as pessoas interajam com o chat', () => 
       expect.arrayContaining([
         expect.stringMatching(anotherChatMessage),
         expect.stringMatching(nickname),
-      ])
-    )
+      ]),
+    );
   });
 });
